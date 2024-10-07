@@ -1,33 +1,40 @@
 const { test, expect } = require("@playwright/test");
 
-test.only("Login Test", async ({ page }) => {
-    await page.goto("https://rahulshettyacademy.com/client");
-    await page.locator("#userEmail").fill("emailbruh@example.com");
-    await page.locator("#userPassword").fill("Asdasdasd1");
-    await page.locator("[value='Login']").click();
-    // await page.waitForLoadState("networkidle");
-    await page.locator(".card-body b").first().waitFor();
-    const titles = await page.locator(".card-body b").allTextContents();
-    console.log(titles);
-}),
+const name = "Jake"
+const lastName = "Peralta"
+const email = "jakeperalta@example.com"
+const password = "Rybaryba123"
+const mobile = "3336669990"
+const creditCardNumber = "1234 4321 1234 4321"
+const cvvCode = "666"
 
 test("Registration Test", async ({ page }) => {
+    const occupationDropdown = page.locator("[formcontrolname='occupation']")
     await page.goto("https://rahulshettyacademy.com/client");
     await page.locator(".login-wrapper-footer-text").click();
-    await page.locator("#firstName").fill("Jake");
-    await page.locator("#lastName").fill("Peralta");
-    await page.locator("#userEmail").fill("jakeperalta@example.com");
-    await page.locator("#userMobile").fill("3336669990");
-    await page.locator(".custom-select.ng-pristine.ng-valid.ng-touched").click();
-    await page.locator(".custom-select.ng-valid.ng-touched.ng-dirty").selectOption("Doctor");
+    await page.locator("#firstName").fill(name);
+    await page.locator("#lastName").fill(lastName);
+    await page.locator("#userEmail").fill(email);
+    await page.locator("#userMobile").fill(mobile);
+    await occupationDropdown.selectOption("Student");
     await page.locator("input[value='Male']").click();
-    await page.locator("#userPassword").fill("Rybaryba123");
-    await page.locator("#confirmPassword").fill("Rybaryba123");
+    await page.locator("#userPassword").fill(password);
+    await page.locator("#confirmPassword").fill(password);
     await page.locator("input[type='checkbox']").click();
     await page.locator("#login").click();
     await page.locator(".btn.btn-primary").click();
-    await page.locator("#userEmail").fill("jakeperalta@example.com");
-    await page.locator("#userPassword").fill("Rybaryba123");
-    await page.locator("#login").click();
-    console.log(await page.locator(".card-body").nth(1).textContent());
   });
+
+test("Login Test", async ({ page }) => {
+    await page.goto("https://rahulshettyacademy.com/client");
+    await page.locator("#userEmail").fill(email);
+    await page.locator("#userPassword").fill(password);
+    await page.locator("[value='Login']").click();
+    // await page.waitForLoadState("networkidle");
+    const cardTitles = page.locator(".card-body b")
+    await cardTitles.first().waitFor();
+    await cardTitles.first().textContent();
+    const firstCard = page.locator(".card-body b").first()
+    await expect(firstCard).toHaveText("ZARA COAT 3")
+});
+
