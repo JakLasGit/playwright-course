@@ -37,7 +37,8 @@ test("Login Test", async ({ page }) => {
     await expect(firstCard).toHaveText("ZARA COAT 3")
 });
 
-test.only("Adding to card and buying", async ({ page }) => {
+//Mój test
+test("Adding to card and buying", async ({ page }) => {
 await page.goto("https://rahulshettyacademy.com/client");
 await page.locator("#userEmail").fill(email);
 await page.locator("#userPassword").fill(password);
@@ -70,3 +71,64 @@ await page.waitForSelector("tbody tr.ng-star-inserted");
 const allIDs = await page.locator("tbody tr.ng-star-inserted th[scope='row']").allTextContents();
 await expect(allIDs).toContain(orderID);
 });
+
+//Test zrobiony na kursie
+test.only("Test with dinamic iteration", async ({ page }) => 
+{
+  const productName = 'ZARA COAT 3'
+  const products = page.locator(".card-body");
+  await page.goto("https://rahulshettyacademy.com/client");
+  await page.locator("#userEmail").fill(email);
+  await page.locator("#userPassword").fill(password);
+  await page.locator("[value='Login']").click();
+  await page.waitForLoadState("networkidle");
+//For loop na dole bierze wszystkie produkty wytawione na stronie, leci i sprawdza po każdym czy któryś z nich ma productName - Zara Coat 3 ktorego szukamy
+  const count = await products.count();
+  for(let i = 0; i < count; i++) 
+  {
+   if(await products.nth(i).locator("b").textContent() === productName) 
+  {
+    //add to card
+    await products.nth(i).locator("text= Add To Cart").click();
+    break;
+   }
+  }
+  await page.locator("[routerlink*='cart']").click();
+  await expect(page.locator("h3:has-text('ZARA COAT 3')")).toBeVisible();
+  await page.locator("text=Checkout").click();
+  await page.locator("div.field input.txt").nth(1).fill(cvvCode);
+  await page.locator("div.field input.txt").nth(2).fill(name);
+  await page.locator("div.field input.txt").nth(3).fill("rahulshettyacademy");
+  await page.locator("[type='submit']").click();
+  const couponText = page.locator("[style='color: green;']");
+  await couponText.waitFor();
+  await expect(couponText).toHaveText("* Coupon Applied");
+  await page.locator("[placeholder='Select Country']").pressSequentially("Pol");
+  const dropdown = page.locator(".ta-results");
+  await dropdown.waitFor();
+  const optionsCount = await dropdown.locator("button").count();
+  for(let i = 0; i < optionsCount; i++) {
+    const text = await dropdown.locator("button").nth(i).textContent();
+    if(text.trim() === "Poland") {
+      dropdown.locator("button").nth(i).click();
+      break;
+    }
+  }
+  await expect(page.locator("[style*='gray']")).toHaveText(email);
+  await page.locator(".action__submit").click();
+  await expect(page.locator(".hero-primary")).toHaveText(" Thankyou for the order. ");
+  let orderID = await page.locator("td.em-spacer-1 .ng-star-inserted").textContent();
+  orderID = orderID.replace(/\|/g, '').trim();
+  await page.locator("label[routerlink='/dashboard/myorders']").click();
+  await page.locator("tbody").waitFor();
+  const rows = page.locator("tbody tr");
+  for(let i = 0; i < await rows.count(); i++) {
+    const rowOrderId = await rows.nth(i).locator("th").textContent();
+    if(rowOrderId.includes(orderID)) {
+      await rows.nth(i).locator("button").first().click();
+      break;
+    }
+  }
+  const orderIdDetails = page.locator(".title");
+  await expect(orderIdDetails).toHaveText(" ZARA COAT 3 ");
+})
